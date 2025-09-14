@@ -88,13 +88,8 @@
             transform: translateY(-5px);
             box-shadow: 0 6px 12px rgba(0,0,0,0.15);
         }
-
-        .portfolio-item img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-        }
-
+        
+        /* Modifikasi untuk item tanpa gambar */
         .portfolio-item-content {
             padding: 20px;
         }
@@ -102,6 +97,15 @@
         .portfolio-item-content h3 {
             margin-top: 0;
             color: #3498db;
+        }
+        
+        .portfolio-item-content a {
+            text-decoration: none;
+            color: #3498db;
+        }
+        
+        .portfolio-item-content a:hover {
+            text-decoration: underline;
         }
 
         .portfolio-item-content p {
@@ -131,34 +135,23 @@
             <h2>Proyek dan Tugas Terbaru</h2>
             <div class="portfolio-grid">
                 <div class="portfolio-item">
-                    <img src="https://via.placeholder.com/400x200.png?text=LaluLintasKu+-+Siap" alt="Gambar LaluLintasKu - Statistik & Laporan">
                     <div class="portfolio-item-content">
-                        <h3>LaluLintasKu — Statistik & Laporan</h3>
-                        <p>Ini adalah bagian dari proyek LaluLintasKu yang sudah siap digunakan untuk analisis statistik dan pelaporan data.</p>
+                        <h3><a href="https://github.com/akun_anda/proyek_satu" target="_blank">LaluLintasKu — Statistik & Laporan</a></h3>
+                        <p>Bagian **Full Siap**</p>
                     </div>
                 </div>
 
                 <div class="portfolio-item">
-                    <img src="https://via.placeholder.com/400x200.png?text=LaluLintasKu+-+Demo" alt="Gambar LaluLintasKu - Demo">
                     <div class="portfolio-item-content">
-                        <h3>LaluLintasKu — Statistik & Laporan</h3>
-                        <p>Versi demo atau percobaan dari fitur statistik dan laporan LaluLintasKu untuk demonstrasi fungsionalitas.</p>
+                        <h3><a href="https://github.com/akun_anda/proyek_dua" target="_blank">LaluLintasKu — Statistik & Laporan</a></h3>
+                        <p>Bagian **Demo/Percobaan**</p>
                     </div>
                 </div>
 
                 <div class="portfolio-item">
-                    <img src="https://via.placeholder.com/400x200.png?text=Traffic+Alert+-+Awal" alt="Gambar Traffic Alert SMA">
                     <div class="portfolio-item-content">
-                        <h3>Traffic Alert SMA</h3>
-                        <p>Tahap awal pengembangan proyek Traffic Alert SMA, termasuk fitur voting dan status tengah.</p>
-                    </div>
-                </div>
-
-                <div class="portfolio-item">
-                    <img src="https://via.placeholder.com/400x200.png?text=Proyek+Lainnya" alt="Gambar Proyek Lainnya">
-                    <div class="portfolio-item-content">
-                        <h3>Judul Proyek Lain</h3>
-                        <p>Deskripsi singkat mengenai proyek atau tugas lainnya yang Anda kerjakan.</p>
+                        <h3><a href="https://github.com/akun_anda/proyek_tiga" target="_blank">Traffic Alert SMA (Voting + Status Tengah)</a></h3>
+                        <p>Bagian **Awal mula pengembangan**</p>
                     </div>
                 </div>
             </div>
