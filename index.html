@@ -11,6 +11,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-analytics.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js"></script>
 
     <style>
         /* Gaya Dasar */
@@ -284,6 +285,14 @@
             width: 90%;
             max-width: 400px;
         }
+
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+        }
         
         .login-form-container input {
             width: calc(100% - 20px);
@@ -307,7 +316,11 @@
         }
 
         .login-form-container .toggle-button {
-            background-color: #ccc;
+            background-color: transparent;
+            color: var(--accent-color);
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
             margin-top: 10px;
         }
         
@@ -432,12 +445,25 @@
 
     <div id="login-overlay">
         <div class="login-form-container">
-            <h3>Login / Daftar</h3>
-            <input type="email" id="email" placeholder="Email" required>
-            <input type="password" id="password" placeholder="Password" required>
-            <p id="auth-message"></p>
-            <button onclick="loginUser()">Masuk</button>
-            <button class="toggle-button" onclick="registerUser()">Daftar</button>
+            <div id="login-form" class="auth-form active">
+                <h3>Masuk</h3>
+                <input type="email" id="login-email" placeholder="Email" required>
+                <input type="password" id="login-password" placeholder="Password" required>
+                <p id="auth-message-login"></p>
+                <button onclick="loginUser()">Masuk</button>
+                <button class="toggle-button" onclick="showRegisterForm()">Belum punya akun? Daftar</button>
+            </div>
+
+            <div id="register-form" class="auth-form">
+                <h3>Daftar Akun Baru</h3>
+                <input type="text" id="register-username" placeholder="Username" required>
+                <input type="email" id="register-email" placeholder="Email" required>
+                <input type="password" id="register-password" placeholder="Password" required>
+                <input type="password" id="register-confirm-password" placeholder="Konfirmasi Password" required>
+                <p id="auth-message-register"></p>
+                <button onclick="registerUser()">Daftar</button>
+                <button class="toggle-button" onclick="showLoginForm()">Sudah punya akun? Masuk</button>
+            </div>
         </div>
     </div>
     
@@ -446,6 +472,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
         import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-analytics.js";
+        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
         
         // Konfigurasi Firebase Anda
         const firebaseConfig = {
@@ -455,13 +482,15 @@
             storageBucket: "titik-terang.firebasestorage.app",
             messagingSenderId: "738159683181",
             appId: "1:738159683181:web:cdd1298f198abab1c2c164",
-            measurementId: "G-V18Y32S4T3"
+            measurementId: "G-V18Y32S4T3",
+            databaseURL: "https://titik-terang-default-rtdb.asia-southeast1.firebasedatabase.app/" // Ganti dengan URL database Anda
         };
         
         // Inisialisasi Firebase
         const app = initializeApp(firebaseConfig);
         const analytics = getAnalytics(app);
         const auth = getAuth(app);
+        const database = getDatabase(app);
 
         const sections = document.querySelectorAll('.section');
         const header = document.getElementById('main-header');
@@ -469,10 +498,18 @@
         const loginBox = document.getElementById('login-box-container');
         const loginOverlay = document.getElementById('login-overlay');
         const loggedInPanel = document.getElementById('logged-in-panel');
-        const authMessage = document.getElementById('auth-message');
         const welcomeMessage = document.getElementById('welcome-message');
-        const emailInput = document.getElementById('email');
-        const passwordInput = document.getElementById('password');
+
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const authMessageLogin = document.getElementById('auth-message-login');
+        const authMessageRegister = document.getElementById('auth-message-register');
+        const loginEmailInput = document.getElementById('login-email');
+        const loginPasswordInput = document.getElementById('login-password');
+        const registerUsernameInput = document.getElementById('register-username');
+        const registerEmailInput = document.getElementById('register-email');
+        const registerPasswordInput = document.getElementById('register-password');
+        const registerConfirmPasswordInput = document.getElementById('register-confirm-password');
 
         function checkVisibility() {
             sections.forEach((section, index) => {
@@ -506,19 +543,36 @@
         loginLink.addEventListener('click', (e) => {
             e.preventDefault();
             loginOverlay.style.display = 'flex';
+            showLoginForm();
         });
 
+        // Fungsi untuk menampilkan form login dan menyembunyikan form daftar
+        function showLoginForm() {
+            loginForm.classList.add('active');
+            registerForm.classList.remove('active');
+            authMessageLogin.textContent = '';
+            authMessageRegister.textContent = '';
+        }
+
+        // Fungsi untuk menampilkan form daftar dan menyembunyikan form login
+        function showRegisterForm() {
+            registerForm.classList.add('active');
+            loginForm.classList.remove('active');
+            authMessageLogin.textContent = '';
+            authMessageRegister.textContent = '';
+        }
+
         async function loginUser() {
-            const email = emailInput.value;
-            const password = passwordInput.value;
+            const email = loginEmailInput.value;
+            const password = loginPasswordInput.value;
+            authMessageLogin.textContent = '';
 
             try {
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
-                authMessage.textContent = 'Login berhasil!';
-                authMessage.style.color = '#27ae60';
+                authMessageLogin.textContent = 'Login berhasil!';
+                authMessageLogin.style.color = '#27ae60';
                 setTimeout(() => {
                     loginOverlay.style.display = 'none';
-                    // Tampilkan panel khusus pengguna terdaftar
                     loggedInPanel.style.display = 'flex';
                     loginBox.style.display = 'none';
                     welcomeMessage.textContent = `Selamat datang kembali, ${userCredential.user.email}!`;
@@ -531,21 +585,45 @@
                 } else if (error.code === 'auth/invalid-email') {
                     errorMessage = 'Format email tidak valid.';
                 }
-                authMessage.textContent = errorMessage;
-                authMessage.style.color = '#e74c3c';
+                authMessageLogin.textContent = errorMessage;
+                authMessageLogin.style.color = '#e74c3c';
             }
         }
         
         async function registerUser() {
-            const email = emailInput.value;
-            const password = passwordInput.value;
-            
+            const username = registerUsernameInput.value;
+            const email = registerEmailInput.value;
+            const password = registerPasswordInput.value;
+            const confirmPassword = registerConfirmPasswordInput.value;
+            authMessageRegister.textContent = '';
+
+            if (password !== confirmPassword) {
+                authMessageRegister.textContent = 'Password tidak cocok.';
+                authMessageRegister.style.color = '#e74c3c';
+                return;
+            }
+
             try {
-                await createUserWithEmailAndPassword(auth, email, password);
-                authMessage.textContent = 'Pendaftaran berhasil! Silakan login.';
-                authMessage.style.color = '#27ae60';
-                emailInput.value = '';
-                passwordInput.value = '';
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                // Simpan username di Firebase Realtime Database
+                set(ref(database, 'users/' + user.uid), {
+                    username: username,
+                    email: email
+                });
+
+                authMessageRegister.textContent = 'Pendaftaran berhasil! Silakan masuk.';
+                authMessageRegister.style.color = '#27ae60';
+                registerUsernameInput.value = '';
+                registerEmailInput.value = '';
+                registerPasswordInput.value = '';
+                registerConfirmPasswordInput.value = '';
+
+                setTimeout(() => {
+                    showLoginForm();
+                }, 1500);
+
             } catch (error) {
                 let errorMessage = "Terjadi kesalahan. Silakan coba lagi.";
                 if (error.code === 'auth/email-already-in-use') {
@@ -555,8 +633,8 @@
                 } else if (error.code === 'auth/invalid-email') {
                     errorMessage = 'Format email tidak valid.';
                 }
-                authMessage.textContent = errorMessage;
-                authMessage.style.color = '#e74c3c';
+                authMessageRegister.textContent = errorMessage;
+                authMessageRegister.style.color = '#e74c3c';
             }
         }
 
@@ -573,12 +651,11 @@
 
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                // Pengguna sudah login
                 loginBox.style.display = 'none';
                 loggedInPanel.style.display = 'flex';
+                // Anda bisa mengambil username dari database di sini jika perlu
                 welcomeMessage.textContent = `Selamat datang kembali, ${user.email}!`;
             } else {
-                // Pengguna belum login
                 loginBox.style.display = 'block';
                 loggedInPanel.style.display = 'none';
             }
