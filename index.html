@@ -3,226 +3,279 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portofolio Tugas Saya</title>
+    <title>Portofolio Der R.H</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Gaya dasar untuk seluruh halaman */
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #f4f7f6;
-            color: #333;
-            scroll-behavior: smooth; /* Membuat scroll lebih halus saat klik navigasi */
+        /* Gaya Dasar */
+        :root {
+            --bg-color-1: #f4f7f6;
+            --bg-color-2: #e0eafc;
+            --bg-color-3: #fff;
+            --text-color-dark: #2c3e50;
+            --text-color-light: #555;
+            --accent-color: #3498db;
         }
 
-        /* Header dan navigasi */
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color-1);
+            color: var(--text-color-light);
+            transition: background-color 0.8s ease-in-out;
+            scroll-behavior: smooth;
+        }
+
+        /* Header */
         header {
-            background-color: #fff;
+            background-color: transparent;
             padding: 20px 50px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            position: sticky; /* Membuat header tetap di atas saat scroll */
+            position: fixed;
+            width: 100%;
             top: 0;
             z-index: 1000;
+            transition: background-color 0.3s ease;
         }
 
-        header .logo {
+        header.scrolled {
+            background-color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .logo {
             font-size: 24px;
-            font-weight: bold;
-            color: #2c3e50;
+            font-weight: 600;
+            color: var(--text-color-dark);
+            transition: color 0.3s ease;
         }
 
         nav a {
             text-decoration: none;
-            color: #555;
+            color: var(--text-color-light);
             margin-left: 25px;
             font-weight: 500;
             transition: color 0.3s ease;
         }
 
         nav a:hover {
-            color: #3498db;
+            color: var(--accent-color);
         }
 
-        /* Bagian utama (main content) */
-        .container {
-            max-width: 900px;
-            margin: 40px auto;
+        /* Bagian Utama */
+        .section {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             padding: 0 20px;
+            transition: background-color 0.8s ease-in-out;
+            position: relative;
         }
 
-        /* Gaya umum untuk setiap section */
-        section {
-            margin-bottom: 60px;
-        }
-
-        h2 {
+        .section-1 {
+            background: linear-gradient(135deg, var(--bg-color-2), #cfdef3);
             text-align: center;
-            margin-bottom: 40px;
-            color: #2c3e50;
+            color: var(--text-color-dark);
         }
 
-        /* Bagian Hero (pengenalan) */
-        .hero {
-            text-align: center;
-            padding: 60px 20px;
-            background: linear-gradient(135deg, #e0eafc, #cfdef3);
-            border-radius: 10px;
-        }
-
-        .hero h1 {
-            font-size: 40px;
-            color: #2c3e50;
-            margin-bottom: 10px;
-        }
-
-        .hero p {
-            font-size: 18px;
-            color: #555;
-        }
-
-        /* Bagian Tentang Saya */
-        #tentang p {
-            text-align: center;
-            font-size: 16px;
-            line-height: 1.7;
-            max-width: 700px;
-            margin: 0 auto;
-        }
-
-        /* Bagian Portofolio */
-        .portfolio-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 25px;
-        }
-
-        .portfolio-item {
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-            overflow: hidden;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .portfolio-item:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
-        }
-        
-        .portfolio-item-content {
-            padding: 25px;
-        }
-
-        .portfolio-item-content h3 {
-            margin-top: 0;
-            margin-bottom: 10px;
-            font-size: 18px;
-        }
-        
-        .portfolio-item-content h3 a {
-            text-decoration: none;
-            color: #3498db;
-        }
-        
-        .portfolio-item-content h3 a:hover {
-            text-decoration: underline;
-        }
-
-        .portfolio-item-content p {
-            font-size: 14px;
-            color: #777;
+        .section-1 h1 {
+            font-size: 4rem;
             margin: 0;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeIn 1s forwards;
+            animation-delay: 0.5s;
         }
         
-        /* Bagian Kontak */
-        #kontak {
-            padding-top: 30px;
-            border-top: 1px solid #e0e0e0;
+        .section-1 p {
+            font-size: 1.25rem;
+            margin-top: 10px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeIn 1s forwards;
+            animation-delay: 1s;
+        }
+
+        .section-2 {
+            background-color: var(--bg-color-3);
+            text-align: center;
+            flex-direction: column;
+            padding-top: 80px;
+        }
+
+        .project-showcase {
+            max-width: 800px;
+            width: 100%;
+            background: #fff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            text-align: left;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+        
+        .project-showcase.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .project-showcase h2 {
+            font-size: 2.5rem;
+            color: var(--accent-color);
+            margin-bottom: 10px;
+        }
+
+        .project-showcase p {
+            font-size: 1rem;
+            line-height: 1.8;
+            color: #666;
+        }
+
+        .project-showcase .link-button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 25px;
+            background-color: var(--accent-color);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+
+        .project-showcase .link-button:hover {
+            background-color: #2980b9;
+        }
+
+        .section-3 {
+            background-color: var(--bg-color-1);
+            flex-direction: column;
+            color: var(--text-color-dark);
             text-align: center;
         }
+        
+        .section-3 .contact-content {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
 
-        .contact-info p {
-            font-size: 16px;
+        .section-3 .contact-content.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .contact-content h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        .contact-content p {
+            font-size: 1.1rem;
             line-height: 1.8;
-            margin: 10px 0;
         }
-
-        .contact-info a {
-            color: #3498db;
+        
+        .contact-content a {
+            color: var(--accent-color);
             text-decoration: none;
-            font-weight: 500;
+            font-weight: 600;
+            transition: color 0.3s ease;
         }
 
-        .contact-info a:hover {
+        .contact-content a:hover {
             text-decoration: underline;
         }
-
+        
+        /* Animasi Kunci */
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
 <body>
 
-    <header>
+    <header id="main-header">
         <div class="logo">Portofolio Saya</div>
         <nav>
-            <a href="#tugas">Tugas</a>
-            <a href="#tentang">Tentang</a>
+            <a href="#proyek">Proyek</a>
             <a href="#kontak">Kontak</a>
         </nav>
     </header>
 
-    <div class="container">
-        
-        <section class="hero">
-            <h1>Selamat Datang di Portofolio Tugas Saya</h1>
-            <p>Di sini Anda akan menemukan koleksi tugas dan proyek yang telah saya kerjakan.</p>
-        </section>
-        
-        <section id="tentang">
-            <h2>Tentang Saya</h2>
-            <p>
-                Saya adalah seorang pelajar yang bersemangat dalam dunia teknologi dan pengembangan web. Saya memiliki minat besar dalam mempelajari hal-hal baru dan menerapkannya dalam proyek-proyek kreatif. Website ini adalah wadah bagi saya untuk mendokumentasikan perjalanan belajar dan hasil karya saya.
-            </p>
-        </section>
-
-        <section id="tugas">
-            <h2>Proyek dan Tugas Terbaru</h2>
-            <div class="portfolio-grid">
-                <div class="portfolio-item">
-                    <div class="portfolio-item-content">
-                        <h3><a href="https://itsderr.github.io/LAPORAN-LALU-LINTAS-REALTIME/#" target="_blank">LaluLintasKu — Statistik & Laporan</a></h3>
-                        <p>Bagian **Full Siap**</p>
-                    </div>
-                </div>
-
-                <div class="portfolio-item">
-                    <div class="portfolio-item-content">
-                        <h3><a href="https://itsderr.github.io/MENCOBA-TEST-PERCOBAAN/" target="_blank">LaluLintasKu — Statistik & Laporan</a></h3>
-                        <p>Bagian **Demo/Percobaan**</p>
-                    </div>
-                </div>
-
-                <div class="portfolio-item">
-                    <div class="portfolio-item-content">
-                        <h3><a href="https://itsderr.github.io/Edukasi/" target="_blank">Traffic Alert SMA (Voting + Status Tengah)</a></h3>
-                        <p>Bagian **Awal mula pengembangan**</p>
-                    </div>
-                </div>
+    <div class="main-wrapper">
+        <section class="section section-1" id="beranda">
+            <div>
+                <h1>Selamat Datang di Portofolio Saya</h1>
+                <p>Jelajahi karya terbaik yang telah saya kembangkan.</p>
             </div>
         </section>
 
-        <section id="kontak">
-            <h2>Hubungi Saya</h2>
-            <div class="contact-info">
-                <p><strong>Nama:</strong> Der R.H</p>
-                <p><strong>Email:</strong> <a href="mailto:deryl.ramadhan14@sma.belajar.id">deryl.ramadhan14@sma.belajar.id</a></p>
-                <p><strong>Telepon:</strong> <a href="tel:081233508133">081233508133</a></p>
+        <section class="section section-2" id="proyek">
+            <div class="project-showcase">
+                <h2>LaluLintasKu — Statistik & Laporan</h2>
+                <p>
+                    Ini adalah proyek utama saya, sebuah sistem real-time untuk memantau dan melaporkan kondisi lalu lintas. Aplikasi ini tidak hanya menyajikan data statistik yang akurat, tetapi juga memungkinkan pengguna untuk memberikan laporan langsung mengenai kejadian di jalan.
+                    Dengan antarmuka yang intuitif dan data yang selalu diperbarui, proyek ini dirancang untuk membantu pengguna mengambil keputusan perjalanan yang lebih baik dan aman.
+                </p>
+                <a href="https://itsderr.github.io/LAPORAN-LALU-LINTAS-REALTIME/#" class="link-button" target="_blank">Lihat Proyek</a>
             </div>
         </section>
 
+        <section class="section section-3" id="kontak">
+            <div class="contact-content">
+                <h2>Hubungi Saya</h2>
+                <p>
+                    Tertarik untuk berdiskusi lebih lanjut atau memiliki proyek yang ingin dikerjakan bersama? Jangan ragu untuk menghubungi saya melalui informasi di bawah ini.
+                </p>
+                <p>
+                    <strong>Nama:</strong> Der R.H<br>
+                    <strong>Email:</strong> <a href="mailto:deryl.ramadhan14@sma.belajar.id">deryl.ramadhan14@sma.belajar.id</a><br>
+                    <strong>Telepon:</strong> <a href="tel:081233508133">081233508133</a>
+                </p>
+            </div>
+        </section>
     </div>
+    
+    <script>
+        const sections = document.querySelectorAll('.section');
+        const header = document.getElementById('main-header');
 
+        function checkVisibility() {
+            sections.forEach(section => {
+                const sectionTop = section.getBoundingClientRect().top;
+                const windowHeight = window.innerHeight;
+
+                if (sectionTop < windowHeight * 0.75) {
+                    const showcase = section.querySelector('.project-showcase');
+                    const contactContent = section.querySelector('.contact-content');
+                    if (showcase) {
+                        showcase.classList.add('visible');
+                    }
+                    if (contactContent) {
+                        contactContent.classList.add('visible');
+                    }
+                }
+            });
+
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        }
+
+        window.addEventListener('scroll', checkVisibility);
+        window.addEventListener('load', checkVisibility);
+    </script>
 </body>
 </html>
