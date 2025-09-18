@@ -1,931 +1,668 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>LaluLintasKu — Statistik & Laporan</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Titik Terang</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-analytics.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js"></script>
+
     <style>
-        :root{
-            --blue-dark: #004494;
-            --blue: #0056b3;
-            --page-bg: #f0f2f5;
-            --panel-bg: #fff;
-            --text-color: #333;
-            --link-color: #0056b3;
-            --border-color: #e0e0e0;
+        /* Gaya Dasar */
+        :root {
+            --bg-color-1: #f4f7f6;
+            --bg-color-2: #e0eafc;
+            --bg-color-3: #fff;
+            --text-color-dark: #2c3e50;
+            --text-color-light: #555;
+            --accent-color: #3498db;
         }
-        body{
-            margin:0; font-family: Inter, system-ui, Arial, sans-serif;
-            background-color: var(--page-bg);
-            color: var(--text-color);
-            line-height: 1.6;
-            background-image: url('background.png');
-            background-size: cover;
-            background-attachment: fixed;
-            background-position: center center;
-        }
-        .header{
-            background: var(--panel-bg);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            position: fixed;
-            top: 0;
-            width: 100%;
-            z-index: 1000;
-            padding: 10px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            box-sizing: border-box;
-        }
-        .header h1{
-            font-size: 24px;
-            font-weight: bold;
+
+        body {
+            font-family: 'Poppins', sans-serif;
             margin: 0;
-            color: var(--blue);
-            cursor: pointer;
+            padding: 0;
+            background-color: var(--bg-color-1);
+            color: var(--text-color-light);
+            scroll-behavior: smooth;
+            overflow-x: hidden;
         }
-        .navbar a{
-            color: var(--text-color);
-            text-decoration: none;
-            font-weight: 500;
-            margin-left: 25px;
-            transition: color 0.2s ease, transform 0.2s ease;
-        }
-        .navbar a:hover, .navbar a.active{
-            color: var(--blue-dark);
-            transform: translateY(-2px);
-        }
-        .main{
-            padding: 80px 20px 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        .card{
-            background: var(--panel-bg);
-            border-radius: 16px;
-            padding: 30px;
-            box-shadow: 0 6px 18px rgba(0,0,0,0.08);
-            margin: 20px auto;
-            text-align: center;
-        }
-        .card h2, .card h3{
-            margin-top:0;
-            margin-bottom: 20px;
-            color: var(--blue-dark);
-            font-weight: 600;
-        }
-        select, textarea, input[type="text"], input[type="file"], input[type="password"]{
+
+        /* Header */
+        header {
+            background-color: transparent;
+            padding: 20px 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: fixed;
             width: 100%;
-            max-width: 500px;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            font-size: 16px;
-            margin-bottom: 15px;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            transition: background-color 0.3s ease;
             box-sizing: border-box;
         }
-        textarea{ min-height: 120px; resize: vertical; }
-        .btn{
-            background: var(--blue-dark);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            cursor: pointer;
+
+        header.scrolled {
+            background-color: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .logo {
+            font-size: 24px;
             font-weight: 600;
-            transition: background 0.2s ease;
+            color: var(--text-color-dark);
+            transition: color 0.3s ease;
         }
-        .btn:hover{ background: var(--blue); }
-        .btn-success { background-color: #28a745; }
-        .btn-success:hover { background-color: #218838; }
-        .btn-danger { background-color: #dc3545; }
-        .btn-danger:hover { background-color: #c82333; }
-        .stats-card{
-            max-width: 900px;
-            margin: 20px auto;
-            padding: 30px;
-            border-radius: 16px;
-            background: var(--panel-bg);
-            box-shadow: 0 6px 18px rgba(0,0,0,0.06);
-        }
-        table{
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-            overflow-x: auto;
-            display: block;
-        }
-        th,td{
-            padding: 12px 15px;
-            border: 1px solid var(--border-color);
-            text-align: center;
-            font-size: 14px;
-        }
-        th{ background: #f7faf7; color: #222; }
-        .status-lancar, .status-ramai, .status-padat, .status-macet, .status-gangguan, .status-kecelakaan{
-            font-weight: 700;
-        }
-        .status-lancar{ color: #2b8a3e; }
-        .status-ramai{ color: #f08c00; }
-        .status-padat{ color: #c67a00; }
-        .status-macet{ color: #d92727; }
-        .status-gangguan{ color: #f0a500; }
-        .status-kecelakaan{ color: #ff0000; }
-        .muted{ color: #666; font-size: 13px; margin-top: 8px; }
-        .small{ font-size: 13px; color: #444; }
-        .filter-item {
-            margin-bottom: 15px;
-            text-align: left;
-        }
-        .filter-item label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-        }
-        .status-lancar {
-          color: #2b8a3e;
-        }
-        .status-macet {
-          color: #d92727;
-        }
-        .suggestion-btn {
-            position: fixed;
-            bottom: 25px;
-            right: 25px;
-            background: var(--blue-dark);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 55px;
-            height: 55px;
-            font-size: 26px;
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            z-index: 1500;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.2s ease, background 0.2s ease;
-        }
-        .suggestion-btn:hover {
-            transform: scale(1.1);
-            background: var(--blue);
-        }
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 2000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.6);
-            justify-content: center;
-            align-items: center;
-        }
-        .modal-content {
-            background-color: #fefefe;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-            position: relative;
-            width: 90%;
-            max-width: 450px;
-            text-align: center;
-        }
-        .modal-content h3 {
-            margin-top: 0;
-        }
-        .modal-close-btn {
-            color: #aaa;
-            position: absolute;
-            top: 15px;
-            right: 20px;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .modal-close-btn:hover, .modal-close-btn:focus {
-            color: #000;
+
+        nav a {
             text-decoration: none;
+            color: var(--text-color-light);
+            margin-left: 25px;
+            font-weight: 500;
+            transition: color 0.3s ease;
         }
-        .footer {
-            text-align: center;
-            margin-top: 40px;
-            padding: 20px;
+
+        nav a:hover {
+            color: var(--accent-color);
         }
-        .admin-report-container {
-            text-align: left;
-            margin-top: 20px;
-            padding: 20px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-        }
-        .admin-report-container h4 {
-            margin-top: 0;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 10px;
-        }
-        .admin-report-item {
-            border-bottom: 1px solid #eee;
-            padding: 15px 0;
-        }
-        .admin-report-item:last-child {
-            border-bottom: none;
-        }
-        .admin-report-photo {
-            max-width: 100%;
-            height: auto;
-            border-radius: 8px;
-            margin-top: 10px;
-        }
-        .action-buttons button {
-            margin-right: 8px;
-        }
-        /* Media Queries for Mobile */
-        @media (max-width: 600px) {
-            .header{
+
+        /* Responsive Navbar */
+        @media (max-width: 768px) {
+            header {
                 flex-direction: column;
-                padding: 10px;
+                padding: 15px 20px;
             }
-            .header h1{
-                margin-bottom: 10px;
+            nav {
+                margin-top: 10px;
             }
-            .navbar a{
+            nav a {
                 margin: 0 10px;
             }
-            .main{
-                padding-top: 100px;
-            }
+        }
+
+        /* Bagian Utama */
+        .section {
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0 20px;
+            position: relative;
+            overflow: hidden;
+            flex-direction: column;
+        }
+
+        .section-1 {
+            background: linear-gradient(135deg, var(--bg-color-2), #cfdef3);
+            text-align: center;
+            color: var(--text-color-dark);
+        }
+
+        .section-2 {
+            background-color: var(--bg-color-3);
+            text-align: center;
+            flex-direction: column;
+            padding-top: 80px;
+        }
+
+        .section-3 {
+            background-color: var(--bg-color-1);
+            flex-direction: column;
+            color: var(--text-color-dark);
+            text-align: center;
+        }
+        
+        /* Bagian Berita */
+        .section-4 {
+            background-color: #f0f4f7;
+            flex-direction: column;
+            color: var(--text-color-dark);
+            text-align: center;
+        }
+        
+        /* Gaya Khusus untuk Efek Animasi */
+        .section-content {
+            z-index: 2;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .section-content.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .project-showcase, .news-content, .admin-panel {
+            max-width: 800px;
+            width: 100%;
+            background: #fff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            text-align: left;
+        }
+        
+        .news-item {
+            border-bottom: 1px solid #eee;
+            padding: 20px 0;
+            text-align: left;
+        }
+
+        .news-item:last-child {
+            border-bottom: none;
+        }
+
+        .news-item h3 {
+            color: var(--accent-color);
+            margin-top: 0;
+            font-size: 1.5rem;
+        }
+
+        .news-item p {
+            font-size: 1rem;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        /* Efek Garis "Membuka dan Menutup" */
+        .curtain-line {
+            position: absolute;
+            height: 100%;
+            width: 50%;
+            background-color: var(--bg-color-1);
+            z-index: 5;
+            transition: transform 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .curtain-line.left {
+            top: 0;
+            left: 0;
+            transform: translateX(0);
+        }
+        
+        .curtain-line.right {
+            top: 0;
+            right: 0;
+            transform: translateX(0);
+        }
+
+        /* Saat di-scroll ke bawah */
+        .section.show .curtain-line.left {
+            transform: translateX(-100%);
+        }
+        .section.show .curtain-line.right {
+            transform: translateX(100%);
+        }
+        
+        /* Saat digulir ke atas (menuju halaman sebelumnya) */
+        .section.hide .curtain-line.left {
+            transform: translateX(0);
+        }
+        .section.hide .curtain-line.right {
+            transform: translateX(0);
+        }
+
+        /* Konten dalam bagian proyek */
+        .project-showcase h2 {
+            font-size: 2.5rem;
+            color: var(--accent-color);
+            margin-bottom: 10px;
+        }
+
+        .project-showcase p {
+            font-size: 1rem;
+            line-height: 1.8;
+            color: #666;
+        }
+
+        .project-showcase .link-button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 12px 25px;
+            background-color: var(--accent-color);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+
+        .project-showcase .link-button:hover {
+            background-color: #2980b9;
+        }
+
+        /* Konten dalam bagian kontak */
+        .contact-content h2 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        .contact-content p {
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+        
+        .contact-content a {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .contact-content a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Gaya Login Form */
+        #login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        
+        .login-form-container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+        }
+
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+        }
+        
+        .login-form-container input {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .login-form-container button {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--accent-color);
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .login-form-container .toggle-button {
+            background-color: transparent;
+            color: var(--accent-color);
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin-top: 10px;
+        }
+        
+        .login-form-container button:hover {
+            background-color: #2980b9;
+        }
+
+        .login-form-container #auth-message {
+            color: #e74c3c;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        /* Gaya Kotak Login di Halaman Utama */
+        .login-box {
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 15px 30px;
+            border-radius: 8px;
+            margin-top: 30px;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            transition: transform 0.3s ease, background-color 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .login-box:hover {
+            transform: scale(1.05);
+            background-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .login-box a {
+            font-weight: 600;
+            color: var(--text-color-dark);
+            text-decoration: none;
+            font-size: 1.2rem;
         }
     </style>
 </head>
 <body>
 
-<header class="header">
-  <h1>LaluLintasKu</h1>
-  <nav class="navbar" id="navbar">
-    <a href="#" data-target="statistikSection" class="active">Statistik</a>
-    <a href="#" data-target="laporanSection">Laporan</a>
-    <a href="#" data-target="kameraSection">Sistem Kamera</a>
-  </nav>
-</header>
+    <header id="main-header">
+        <div class="logo">Titik Terang</div>
+        <nav>
+            <a href="#proyek">Proyek</a>
+            <a href="#berita">Berita</a>
+            <a href="#kontak">Kontak</a>
+        </nav>
+    </header>
 
-<main class="main" id="mainContent">
-
-<section id="statistikSection" class="stats-card">
-  <h3>📊 Statistik Laporan (≤ 1 jam)</h3>
-  <div style="margin-bottom:12px;">
-    <div class="filter-item">
-      <label for="filterProv">Provinsi:</label>
-      <select id="filterProv">
-        <option value="">-- Pilih Provinsi --</option>
-        <option value="Jawa Timur">Jawa Timur</option>
-        <option value="Jawa Barat">Jawa Barat</option>
-        <option value="DKI Jakarta">DKI Jakarta</option>
-      </select>
-    </div>
-    
-    <div class="filter-item">
-      <label for="filterKota">Kota:</label>
-      <select id="filterKota">
-        <option value="">-- Pilih Kota --</option>
-      </select>
-    </div>
-    
-    <div class="filter-item">
-      <label for="filterDaerah">Daerah:</label>
-      <select id="filterDaerah">
-        <option value="">-- Pilih Daerah --</option>
-      </select>
-    </div>
-  </div>
-
-  <div id="chartContainer">
-    <div id="chartBox"><canvas id="chart"></canvas></div>
-    <div id="chartInfo">Belum ada laporan.</div>
-  </div>
-</section>
-
-<section id="laporanSection" class="card" style="display:none;">
-  <h2>Laporan Lalu Lintas</h2>
-  <label for="provinsi">Pilih Provinsi:</label>
-  <select id="provinsi"><option value="">-- Pilih Provinsi --</option><option value="Jawa Timur">Jawa Timur</option><option value="Jawa Barat">Jawa Barat</option><option value="DKI Jakarta">DKI Jakarta</option></select>
-
-  <div id="kotaWrap" style="display:none;"><label for="kota">Pilih Kota/Kabupaten:</label><select id="kota"><option value="">-- Pilih Kota --</option></select></div>
-  <div id="daerahWrap" style="display:none;"><label for="daerah">Pilih Daerah/Kecamatan:</label><select id="daerah"><option value="">-- Pilih Daerah --</option></select></div>
-  <div id="jalanWrap" style="display:none;"><label for="jalan">Pilih Nama Jalan:</label><select id="jalan"><option value="">-- Pilih Nama Jalan --</option></select></div>
-  <div id="statusWrap" style="display:none;"><label for="status">Status Kondisi:</label><select id="status"><option value="">-- Pilih Kondisi --</option><option value="Macet">Macet</option><option value="Gangguan Lalu Lintas">Gangguan Lalu Lintas</option><option value="Kecelakaan">Kecelakaan</option></select></div>
-  <div id="descWrap" style="display:none;"><label for="deskripsi">Deskripsi (opsional):</label><textarea id="deskripsi" placeholder="Contoh: Lampu merah tidak berfungsi / antrean 500m"></textarea></div>
-  <div id="fotoWrap" style="display:none;"><label for="foto">Tambahkan Foto (opsional):</label><input type="file" id="foto" accept="image/*"><img id="fotoPreview" src=""></div>
-  <div id="lokasiWrap" style="display:none;"><button class="btn" id="getLocationBtn">📍 Dapatkan Lokasi</button><div id="lokasiInfo" class="small"></div></div>
-  <div id="submitWrap" style="display:none;"><button class="btn" id="submitBtn">Kirim Laporan</button><div class="muted">Laporan akan masuk ke ringkasan dan statistik. Batas maksimal 1 laporan per 20 menit per device.</div></div>
-  <div id="summary" style="margin-top:18px;"></div>
-</section>
-
-<section id="kameraSection" class="card" style="display:none;">
-  <h3>📸 Statistik sistem kamera</h3>
-  <div id="kameraStatusContainer">
-    <p>Status:</p>
-    <div id="kameraStatus" style="font-size: 1.5rem; font-weight: bold;">Memuat data...</div>
-    <p class="muted">Jumlah Kendaraan: <span id="vehicleCount">Memuat...</span></p>
-  </div>
-</section>
-
-<section id="loginSection" class="card" style="display:none;">
-  <h3>Login Admin</h3>
-  <form id="loginForm">
-    <label for="username">Username:</label>
-    <input type="text" id="username" placeholder="Masukkan username">
-    <label for="password">Password:</label>
-    <input type="password" id="password" placeholder="Masukkan password">
-    <button type="submit" class="btn">Login</button>
-  </form>
-</section>
-
-<section id="adminSection" class="stats-card" style="display:none;">
-  <h3 style="display:flex; justify-content: space-between; align-items: center;">
-      <span>Laporan Admin</span>
-      <button class="btn" id="logoutBtn">Logout</button>
-  </h3>
-  
-  <div class="admin-report-container">
-      <h4>Laporan Menunggu Persetujuan</h4>
-      <div id="pendingReportsContainer">
-          <p>Memuat laporan...</p>
-      </div>
-  </div>
-
-  <div class="admin-report-container" style="margin-top:20px;">
-      <h4>Laporan Sudah Disetujui</h4>
-      <div id="confirmedReportsContainer">
-          <p>Memuat laporan...</p>
-      </div>
-  </div>
-</section>
-
-</main>
-
-<footer class="footer">
-    <button class="btn" id="footerLoginBtn">Login Admin</button>
-</footer>
-
-<button class="suggestion-btn" id="suggestionBtn">
-  📝
-</button>
-
-<div id="saranModal" class="modal">
-  <div class="modal-content">
-    <span class="modal-close-btn" id="saranCloseBtn">&times;</span>
-    <h3>📝 Kotak Saran</h3>
-    <p class="muted">Kritik dan saran Anda akan berguna bagi kami ke depannya.</p>
-    <div style="margin-top:20px;">
-        <textarea id="saranTextarea" placeholder="Masukkan saran atau masukan Anda di sini..." style="width:92%; max-width:560px;"></textarea>
-    </div>
-    <button class="btn" id="submitSaranBtn">Kirim Saran</button>
-  </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
-    import { getDatabase, ref, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-database.js";
-    import { getStorage, ref as sRef, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-storage.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyAVHQKQ3iAGWPepnd_DuoGQmpxG40i8uMs",
-      authDomain: "laporan-lalu-lintas.firebaseapp.com",
-      databaseURL: "https://laporan-lalu-lintas-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "laporan-lalu-lintas",
-      storageBucket: "laporan-lalu-lintas.appspot.com",
-      messagingSenderId: "706382913725",
-      appId: "1:706382913725:web:1069a4f53bea6b66a357d4"
-    };
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const storage = getStorage(app);
-
-    const navLinks = document.querySelectorAll('.navbar a');
-    const sections = document.querySelectorAll('main section');
-    const defaultSectionId = 'statistikSection';
-
-    navLinks.forEach(link => {
-        link.addEventListener('click', (e) => {
-            e.preventDefault();
-            const targetId = e.target.getAttribute('data-target');
-            
-            sections.forEach(section => {
-                section.style.display = 'none';
-            });
-            document.getElementById(targetId).style.display = 'block';
-
-            navLinks.forEach(navLink => {
-                navLink.classList.remove('active');
-            });
-            e.target.classList.add('active');
-        });
-    });
-
-    document.getElementById('footerLoginBtn').addEventListener('click', () => {
-        sections.forEach(section => {
-            section.style.display = 'none';
-        });
-        document.getElementById('loginSection').style.display = 'block';
-        navLinks.forEach(navLink => {
-            navLink.classList.remove('active');
-        });
-    });
-
-    document.getElementById(defaultSectionId).style.display = 'block';
-
-    const provEl = document.getElementById('provinsi');
-    const kotaEl = document.getElementById('kota');
-    const daerahEl = document.getElementById('daerah');
-    const jalanEl = document.getElementById('jalan');
-    const kotaWrap = document.getElementById('kotaWrap');
-    const daerahWrap = document.getElementById('daerahWrap');
-    const jalanWrap = document.getElementById('jalanWrap');
-    const statusWrap = document.getElementById('statusWrap');
-    const descEl = document.getElementById('deskripsi');
-    const submitWrap = document.getElementById('submitWrap');
-    const fotoWrap = document.getElementById('fotoWrap');
-    const lokasiWrap = document.getElementById('lokasiWrap');
-    const summaryDiv = document.getElementById('summary');
-    const lokasiInfo = document.getElementById('lokasiInfo');
-    const fotoEl = document.getElementById('foto');
-    const fotoPreview = document.getElementById('fotoPreview');
-
-    const wilayah = {
-      "Jawa Timur": {
-        "Surabaya": {
-          "Genteng": ["Jalan Tunjungan", "Jalan Gubernur Suryo", "Jalan Embong Malang"],
-          "Wonokromo": ["Jalan Joyoboyo", "Jalan Ngagel", "Jalan Raya Darmo"]
-        },
-        "Sidoarjo": {
-          "Krian": ["Jalan Raya Krian", "Jalan Ahmad Yani", "Jalan Basuki Rahmat"],
-          "Waru": ["Jalan Raya Waru", "Jalan Letjend Suprapto", "Jalan Bypass Juanda"]
-        },
-        "Banyuwangi": {
-          "Kecamatan Glagah": ["Jalan Raya Glagah", "Jalan Raya Licin", "Jalan Raya Rogojampi"],
-          "Kecamatan Rogojampi": ["Jalan Raya Rogojampi", "Jalan S Parman", "Jalan MH Thamrin"]
-        }
-      },
-      "Jawa Barat": {
-        "Bandung": {
-          "Coblong": ["Jalan Dago", "Jalan Ciumbuleuit", "Jalan Dipati Ukur"],
-          "Sukajadi": ["Jalan Sukajadi", "Jalan Setiabudi", "Jalan Dr. Setiabudhi"]
-        },
-        "Bekasi": {
-          "Bekasi Timur": ["Jalan Pahlawan", "Jalan Cut Mutia", "Jalan Ir. H. Juanda"],
-          "Bekasi Selatan": ["Jalan Ahmad Yani", "Jalan KH Noer Ali", "Jalan Jend Sudirman"]
-        }
-      },
-      "DKI Jakarta": {
-        "Jakarta Pusat": {
-          "Gambir": ["Jalan Medan Merdeka", "Jalan Majapahit", "Jalan Veteran"],
-          "Menteng": ["Jalan Menteng Raya", "Jalan Teuku Umar", "Jalan Cikini Raya"]
-        },
-        "Jakarta Timur": {
-          "Duren Sawit": ["Jalan Pahlawan Revolusi", "Jalan Swadaya", "Jalan Dermaga"],
-          "Cakung": ["Jalan Raya Cakung", "Jalan Raya Bekasi", "Jalan I Gusti Ngurah Rai"]
-        }
-      }
-    };
-
-    provEl.addEventListener('change', ()=>{
-      const prov = provEl.value;
-      kotaEl.innerHTML='<option value="">-- Pilih Kota --</option>';
-      daerahEl.innerHTML='<option value="">-- Pilih Daerah --</option>';
-      jalanEl.innerHTML='<option value="">-- Pilih Nama Jalan --</option>';
-      kotaWrap.style.display=daerahWrap.style.display=jalanWrap.style.display=statusWrap.style.display='none';
-      descEl.parentNode.style.display='none';
-      submitWrap.style.display=fotoWrap.style.display=lokasiWrap.style.display='none';
-      summaryDiv.innerHTML='';
-      if(prov && wilayah[prov]){
-        Object.keys(wilayah[prov]).forEach(k=>{
-          const o=document.createElement('option'); o.value=k; o.textContent=k; kotaEl.appendChild(o);
-        });
-        kotaWrap.style.display='block';
-      }
-    });
-
-    kotaEl.addEventListener('change', ()=>{
-      const prov=provEl.value, kota=kotaEl.value;
-      daerahEl.innerHTML='<option value="">-- Pilih Daerah --</option>';
-      jalanEl.innerHTML='<option value="">-- Pilih Nama Jalan --</option>';
-      daerahWrap.style.display=jalanWrap.style.display=statusWrap.style.display='none';
-      descEl.parentNode.style.display='none';
-      submitWrap.style.display=fotoWrap.style.display=lokasiWrap.style.display='none';
-      summaryDiv.innerHTML='';
-      if(prov && kota && wilayah[prov][kota]){
-        Object.keys(wilayah[prov][kota]).forEach(d=>{
-          const o=document.createElement('option'); o.value=d; o.textContent=d; daerahEl.appendChild(o);
-        });
-        daerahWrap.style.display='block';
-      }
-    });
-
-    daerahEl.addEventListener('change', ()=>{
-      const prov=provEl.value, kota=kotaEl.value, daerah=daerahEl.value;
-      jalanEl.innerHTML='<option value="">-- Pilih Nama Jalan --</option>';
-      if(daerah && wilayah[prov][kota][daerah]){
-        wilayah[prov][kota][daerah].forEach(j=>{
-          const o=document.createElement('option'); o.value=j; o.textContent=j; jalanEl.appendChild(o);
-        });
-        jalanWrap.style.display='block';
-        statusWrap.style.display='block';
-        descEl.parentNode.style.display='block';
-        submitWrap.style.display=fotoWrap.style.display=lokasiWrap.style.display='block';
-        updateSummary();
-      } else {
-        jalanWrap.style.display='none';
-        statusWrap.style.display='none';
-        descEl.parentNode.style.display='none';
-        submitWrap.style.display=fotoWrap.style.display=lokasiWrap.style.display='none';
-        summaryDiv.innerHTML='';
-      }
-    });
-
-    let currentLocation = null;
-    document.getElementById('getLocationBtn').addEventListener('click', ()=>{
-      if(navigator.geolocation){
-        navigator.geolocation.getCurrentPosition(pos=>{
-          currentLocation = {lat: pos.coords.latitude, lng: pos.coords.longitude};
-          lokasiInfo.textContent = `Latitude: ${currentLocation.lat.toFixed(5)}, Longitude: ${currentLocation.lng.toFixed(5)}`;
-        }, ()=>{ lokasiInfo.textContent='Gagal mendapatkan lokasi'; });
-      }else{ lokasiInfo.textContent='Browser tidak mendukung GPS'; }
-    });
-
-    fotoEl.addEventListener('change', ()=>{
-      if(fotoEl.files[0]){
-        const reader = new FileReader();
-        reader.onload = e=>{ fotoPreview.src = e.target.result; };
-        reader.readAsDataURL(fotoEl.files[0]);
-      } else { fotoPreview.src = ''; }
-    });
-
-    let lastSent = localStorage.getItem('lastSent') || 0;
-    const canSend = ()=> Date.now() - lastSent >= 20*60*1000;
-
-    const statusEl = document.getElementById('status');
-    const submitBtn = document.getElementById('submitBtn');
-
-    submitBtn.addEventListener('click', async () => {
-      if (!provEl.value || !kotaEl.value || !daerahEl.value || !jalanEl.value || !statusEl.value) {
-        alert('Mohon lengkapi semua pilihan yang tersedia.');
-        return;
-      }
-      if (!canSend()) {
-        alert('⏱ Tunggu 20 menit sebelum mengirim laporan lagi.');
-        return;
-      }
-
-      const laporan = {
-        provinsi: provEl.value,
-        kota: kotaEl.value,
-        daerah: daerahEl.value,
-        jalan: jalanEl.value || '',
-        status: statusEl.value,
-        deskripsi: descEl.value || '',
-        foto: '',
-        lokasi: currentLocation || {},
-        waktu: Date.now(),
-        konfirmasi: 'pending' // Default status is pending
-      };
-
-      if (fotoEl.files.length > 0) {
-        try {
-          const file = fotoEl.files[0];
-          const storageRef = sRef(storage, `laporan_foto/${Date.now()}_${file.name}`);
-          const uploadTask = uploadBytesResumable(storageRef, file);
-
-          await new Promise((resolve, reject) => {
-            uploadTask.on('state_changed',
-              (snapshot) => {
-                const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                console.log('Unggah foto sedang berjalan: ' + progress.toFixed(0) + '%');
-              },
-              (error) => {
-                reject(error);
-              },
-              () => {
-                resolve();
-              }
-            );
-          });
-          
-          laporan.foto = await getDownloadURL(storageRef);
-          console.log("Foto berhasil diunggah. URL:", laporan.foto);
-        } catch (e) {
-          console.error("Kesalahan saat mengunggah foto:", e);
-          alert('⚠️ Gagal mengunggah foto. Laporan tetap akan dikirim tanpa foto.');
-        }
-      }
-
-      try {
-        await push(ref(db, 'laporan'), laporan);
-        console.log("Laporan berhasil dikirim!");
-
-        lastSent = Date.now();
-        localStorage.setItem('lastSent', lastSent);
-        statusEl.value = '';
-        descEl.value = '';
-        fotoEl.value = '';
-        fotoPreview.src = '';
-        currentLocation = null;
-        lokasiInfo.textContent = '';
-        alert('✅ Laporan berhasil dikirim! Menunggu konfirmasi admin.');
-      } catch (error) {
-        console.error("Kesalahan saat mengirim laporan ke Realtime Database:", error);
-        alert('❌ Gagal mengirim laporan. Coba lagi atau periksa koneksi internet Anda.');
-      }
-    });
-
-    const saranModal = document.getElementById('saranModal');
-    const suggestionBtn = document.getElementById('suggestionBtn');
-    const saranCloseBtn = document.getElementById('saranCloseBtn');
-    const saranTextarea = document.getElementById('saranTextarea');
-    const submitSaranBtn = document.getElementById('submitSaranBtn');
-
-    suggestionBtn.addEventListener('click', () => {
-        saranModal.style.display = 'flex';
-    });
-    saranCloseBtn.addEventListener('click', () => {
-        saranModal.style.display = 'none';
-    });
-    window.addEventListener('click', (event) => {
-        if (event.target == saranModal) {
-            saranModal.style.display = 'none';
-        }
-    });
-
-    submitSaranBtn.addEventListener('click', async () => {
-        const saran = saranTextarea.value;
-        if (!saran) {
-            alert('Mohon isi saran Anda sebelum mengirim.');
-            return;
-        }
-
-        try {
-            await push(ref(db, 'saran_pengguna'), {
-                saran: saran,
-                waktu: Date.now()
-            });
-            saranTextarea.value = '';
-            saranModal.style.display = 'none';
-            alert('✅ Saran Anda berhasil dikirim!');
-        } catch (error) {
-            console.error("Kesalahan saat mengirim saran:", error);
-            alert('❌ Gagal mengirim saran. Coba lagi atau periksa koneksi internet Anda.');
-        }
-    });
-
-    const ctx = document.getElementById('chart').getContext('2d');
-    let chart = new Chart(ctx, {type:'bar', data:{labels:['Macet','Gangguan Lalu Lintas','Kecelakaan'], datasets:[{label:'Jumlah Laporan',data:[0,0,0],backgroundColor:['#d92727','#f0a500','#ff0000']}]}, options:{responsive:true,plugins:{legend:{display:false}}}});
-
-    const filterProv = document.getElementById('filterProv');
-    const filterKota = document.getElementById('filterKota');
-    const filterDaerah = document.getElementById('filterDaerah');
-
-    filterProv.addEventListener('change', ()=>{
-      filterKota.innerHTML='<option value="">-- Pilih Kota --</option>';
-      filterDaerah.innerHTML='<option value="">-- Pilih Daerah --</option>';
-      if(filterProv.value && wilayah[filterProv.value]){
-        Object.keys(wilayah[filterProv.value]).forEach(k=>{
-          const o=document.createElement('option'); o.value=k; o.textContent=k; filterKota.appendChild(o);
-        });
-      }
-      updateChart();
-    });
-    filterKota.addEventListener('change', ()=>{
-      filterDaerah.innerHTML='<option value="">-- Pilih Daerah --</option>';
-      if(filterProv.value && filterKota.value && wilayah[filterProv.value][filterKota.value]){
-        Object.keys(wilayah[filterProv.value][filterKota.value]).forEach(d=>{
-          const o=document.createElement('option'); o.value=d; o.textContent=d; filterDaerah.appendChild(o);
-        });
-      }
-      updateChart();
-    });
-    filterDaerah.addEventListener('change', updateChart);
-
-    function updateChart(){
-      if(!filterProv.value || !filterKota.value || !filterDaerah.value) { document.getElementById('chartInfo').innerText='Pilih Provinsi, Kota, dan Daerah terlebih dahulu'; return; }
-
-      onValue(ref(db,'laporan'), snapshot=>{
-        const data = snapshot.val() || {};
-        const now = Date.now();
-        const laporanArr = Object.values(data).filter(l => (l.konfirmasi === 'confirmed' || !l.konfirmasi) && (now - l.waktu < 3600000) );
-        const counts={'Macet':0,'Gangguan Lalu Lintas':0,'Kecelakaan':0};
-        laporanArr.forEach(l=>{
-          if(l.provinsi!==filterProv.value || l.kota!==filterKota.value || l.daerah!==filterDaerah.value) return;
-          if(counts[l.status]!==undefined) counts[l.status]++;
-        });
-        chart.data.datasets[0].data = [counts['Macet'], counts['Gangguan Lalu Lintas'], counts['Kecelakaan']];
-        chart.update();
-        const total=Object.values(counts).reduce((a,b)=>a+b,0);
-        let mayoritas='Belum ada laporan';
-        let alasan='';
-        if(total>0){
-          const max=Math.max(...Object.values(counts));
-          const winners=Object.keys(counts).filter(k=>counts[k]===max && max>0);
-          mayoritas=winners.length===1?winners[0]:'Seimbang';
-          alasan=`Jumlah laporan terbanyak di kategori "${mayoritas}"`;
-        }
-        document.getElementById('chartInfo').innerHTML=`
-          <b>Total laporan:</b> ${total}<br>
-          <b>Macet:</b> ${counts['Macet']}<br>
-          <b>Gangguan Lalu Lintas:</b> ${counts['Gangguan Lalu Lintas']}</b><br>
-          <b>Kecelakaan:</b> ${counts['Kecelakaan']}</b><br>
-          <b>Mayoritas:</b> ${mayoritas}</b><br>
-          <b>Alasan:</b> ${alasan}
-        `;
-      });
-    }
-    updateChart();
-
-    function updateSummary(){
-      const prov=provEl.value, kota=kotaEl.value, daerah=daerahEl.value;
-      if(!prov||!kota||!daerah) return;
-      onValue(ref(db,'laporan'), snapshot=>{
-        const data = snapshot.val() || {};
-        const now = Date.now();
-        const laporanArr = Object.values(data).filter(l => (l.konfirmasi === 'confirmed' || !l.konfirmasi) && (now - l.waktu < 3600000) );
-        const counts={'Macet':0,'Gangguan Lalu Lintas':0,'Kecelakaan':0};
-        laporanArr.forEach(l=>{ if(l.provinsi===prov && l.kota===kota && l.daerah===daerah) counts[l.status]++; });
-        const total=Object.values(counts).reduce((a,b)=>a+b,0);
-        let mayoritas='Belum ada laporan', alasan='';
-        if(total>0){
-          const max=Math.max(...Object.values(counts));
-          const winners=Object.keys(counts).filter(k=>counts[k]===max && max>0);
-          mayoritas=winners.length===1?winners[0]:'Seimbang';
-          alasan=`Jumlah laporan terbanyak di kategori "${mayoritas}"`;
-        }
-        summaryDiv.innerHTML=`<div style="margin-top:16px; text-align:center;">
-          <div style="display:inline-block; padding:10px 16px; background:#f7f7f7; border-radius:12px; box-shadow:0 4px 12px rgba(0,0,0,0.04);">
-            <div style="font-size:14px;color:#555">Ringkasan untuk <b>${daerah}, ${kota}</b></div>
-            <div style="margin-top:8px; text-align:left;">
-              <div>Macet: <b>${counts['Macet']}</b></div>
-              <div>Gangguan Lalu Lintas: <b>${counts['Gangguan Lalu Lintas']}</b></div>
-              <div>Kecelakaan: <b>${counts['Kecelakaan']}</b></div>
-              <div style="margin-top:8px;color:#222">Mayoritas: <b>${mayoritas}</b></div>
-              <div style="color:#444">Alasan: ${alasan}</div>
+    <div class="main-wrapper">
+        <section class="section section-1" id="beranda">
+            <div class="section-content">
+                <h1 id="hero-title">Selamat Datang di Titik Terang</h1>
+                <p>Informasi terkini akan selalu kami update setiap waktu, dikembangkan oleh Pembuat web ini.</p>
+                <div class="login-box" id="login-box-container">
+                    <a href="#" id="login-link">Login</a>
+                </div>
             </div>
-          </div>
-        </div>`;
-      });
-    }
+        </section>
 
-    const kameraStatusEl = document.getElementById('kameraStatus');
-    const vehicleCountEl = document.getElementById('vehicleCount');
+        <section class="section section-2" id="proyek">
+            <div class="curtain-line left"></div>
+            <div class="curtain-line right"></div>
+            <div class="section-content project-showcase">
+                <h2>LaluLintasKu — Statistik & Laporan</h2>
+                <p>
+                    Ini adalah proyek utama saya, sebuah sistem real-time untuk memantau dan melaporkan kondisi lalu lintas. Aplikasi ini tidak hanya menyajikan data statistik yang akurat, tetapi juga memungkinkan pengguna untuk memberikan laporan langsung mengenai kejadian di jalan.
+                    Dengan antarmuka yang intuitif dan data yang selalu diperbarui, proyek ini dirancang untuk membantu pengguna mengambil keputusan perjalanan yang lebih baik dan aman.
+                </p>
+                <a href="https://itsderr.github.io/LAPORAN-LALU-LINTAS-REALTIME/#" class="link-button" target="_blank">Lihat Proyek</a>
+            </div>
+        </section>
+        
+        <section class="section section-3" id="berita">
+            <div class="curtain-line left"></div>
+            <div class="curtain-line right"></div>
+            <div class="section-content news-content">
+                <h2>Berita Terbaru</h2>
+                <div class="news-item">
+                    <h3>Pengembangan Fitur Baru: Laporan Cuaca Real-time</h3>
+                    <p>
+                        Kami sedang dalam tahap pengembangan fitur baru untuk LaluLintasKu. Fitur ini akan menyajikan laporan cuaca real-time yang terintegrasi dengan data lalu lintas untuk membantu pengguna merencanakan perjalanan dengan lebih baik.
+                    </p>
+                </div>
+                <div class="news-item">
+                    <h3>Pembaruan Sistem LaluLintasKu</h3>
+                    <p>
+                        Pada tanggal 20 September 2025, kami akan melakukan pembaruan sistem untuk meningkatkan stabilitas dan kecepatan aplikasi. Selama proses ini, mungkin akan terjadi gangguan layanan singkat.
+                    </p>
+                </div>
+                </div>
+        </section>
+
+        <section class="section section-4" id="kontak">
+            <div class="curtain-line left"></div>
+            <div class="curtain-line right"></div>
+            <div class="section-content contact-content">
+                <h2>Hubungi Kami</h2>
+                <p>
+                    Tertarik untuk berdiskusi lebih lanjut atau memiliki proyek yang ingin dikerjakan bersama? Jangan ragu untuk menghubungi kami melalui informasi di bawah ini.
+                </p>
+                <p>
+                    <strong>Nama:</strong> Der R.H<br>
+                    <strong>Email:</strong> <a href="mailto:deryl.ramadhan14@sma.belajar.id">deryl.ramadhan14@sma.belajar.id</a><br>
+                    <strong>Telepon:</strong> <a href="tel:081233508133">081233508133</a>
+                </p>
+            </div>
+        </section>
+        
+        <section class="section logged-in-section" id="logged-in-panel" style="display: none;">
+            <div class="curtain-line left"></div>
+            <div class="curtain-line right"></div>
+            <div class="section-content admin-panel">
+                <h2 id="welcome-message">Dashboard Pengguna</h2>
+                <p>Selamat datang! Anda berhasil masuk.</p>
+                <p>Ini adalah area yang hanya bisa dilihat oleh pengguna terdaftar.</p>
+                <button onclick="logout()">Logout</button>
+            </div>
+        </section>
+
+    </div>
+
+    <div id="login-overlay">
+        <div class="login-form-container">
+            <div id="login-form" class="auth-form active">
+                <h3>Masuk</h3>
+                <input type="email" id="login-email" placeholder="Email" required>
+                <input type="password" id="login-password" placeholder="Password" required>
+                <p id="auth-message-login"></p>
+                <button onclick="loginUser()">Masuk</button>
+                <button class="toggle-button" onclick="showRegisterForm()">Belum punya akun? Daftar</button>
+            </div>
+
+            <div id="register-form" class="auth-form">
+                <h3>Daftar Akun Baru</h3>
+                <input type="text" id="register-username" placeholder="Username" required>
+                <input type="email" id="register-email" placeholder="Email" required>
+                <input type="password" id="register-password" placeholder="Password" required>
+                <input type="password" id="register-confirm-password" placeholder="Konfirmasi Password" required>
+                <p id="auth-message-register"></p>
+                <button onclick="registerUser()">Daftar</button>
+                <button class="toggle-button" onclick="showLoginForm()">Sudah punya akun? Masuk</button>
+            </div>
+        </div>
+    </div>
     
-    // Gunakan try-catch untuk menangani potential error
-    try {
-        const kameraRef = ref(db, 'traffic/status');
-        onValue(kameraRef, (snapshot) => {
-            const data = snapshot.val();
-            if (data) {
-                kameraStatusEl.textContent = data.status.toUpperCase();
-                vehicleCountEl.textContent = data.vehicle_count;
-                kameraStatusEl.classList.remove('status-lancar', 'status-macet');
-                if (data.status === 'macet') {
-                    kameraStatusEl.classList.add('status-macet');
-                } else {
-                    kameraStatusEl.classList.add('status-lancar');
+    <script type="module">
+        // Import fungsi dari Firebase SDK
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
+        import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-analytics.js";
+        import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
+        
+        // Konfigurasi Firebase Anda
+        const firebaseConfig = {
+            apiKey: "AIzaSyD-acVs8C9uW2FGJgVEgFuJnD7eOXzTY-s",
+            authDomain: "titik-terang.firebaseapp.com",
+            projectId: "titik-terang",
+            storageBucket: "titik-terang.firebasestorage.app",
+            messagingSenderId: "738159683181",
+            appId: "1:738159683181:web:cdd1298f198abab1c2c164",
+            measurementId: "G-V18Y32S4T3",
+            databaseURL: "https://titik-terang-default-rtdb.asia-southeast1.firebasedatabase.app/" // Ganti dengan URL database Anda
+        };
+        
+        // Inisialisasi Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const auth = getAuth(app);
+        const database = getDatabase(app);
+
+        const sections = document.querySelectorAll('.section');
+        const header = document.getElementById('main-header');
+        const loginLink = document.getElementById('login-link');
+        const loginBox = document.getElementById('login-box-container');
+        const loginOverlay = document.getElementById('login-overlay');
+        const loggedInPanel = document.getElementById('logged-in-panel');
+        const welcomeMessage = document.getElementById('welcome-message');
+
+        const loginForm = document.getElementById('login-form');
+        const registerForm = document.getElementById('register-form');
+        const authMessageLogin = document.getElementById('auth-message-login');
+        const authMessageRegister = document.getElementById('auth-message-register');
+        const loginEmailInput = document.getElementById('login-email');
+        const loginPasswordInput = document.getElementById('login-password');
+        const registerUsernameInput = document.getElementById('register-username');
+        const registerEmailInput = document.getElementById('register-email');
+        const registerPasswordInput = document.getElementById('register-password');
+        const registerConfirmPasswordInput = document.getElementById('register-confirm-password');
+
+        function checkVisibility() {
+            sections.forEach((section, index) => {
+                const sectionTop = section.getBoundingClientRect().top;
+                const windowHeight = window.innerHeight;
+                const sectionContent = section.querySelector('.section-content');
+
+                if (sectionContent) {
+                    if (sectionTop < windowHeight * 0.75 && sectionTop > -section.offsetHeight * 0.25) {
+                        sectionContent.classList.add('visible');
+                        section.classList.add('show');
+                        section.classList.remove('hide');
+                    } else {
+                        sectionContent.classList.remove('visible');
+                        const prevSection = sections[index - 1];
+                        if (prevSection && prevSection.getBoundingClientRect().top > 0) {
+                            section.classList.add('hide');
+                            section.classList.remove('show');
+                        }
+                    }
                 }
+            });
+
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
             } else {
-                kameraStatusEl.textContent = "DATA TIDAK TERSEDIA";
-                vehicleCountEl.textContent = "-";
-                kameraStatusEl.classList.remove('status-macet');
-                kameraStatusEl.classList.add('status-lancar');
+                header.classList.remove('scrolled');
             }
+        }
+
+        loginLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            loginOverlay.style.display = 'flex';
+            showLoginForm();
         });
-    } catch (e) {
-        console.error("Kesalahan inisialisasi Firebase:", e);
-        kameraStatusEl.textContent = "Gagal memuat data. Periksa konsol.";
-        vehicleCountEl.textContent = "Gagal";
-    }
 
-    // --- Admin Login & Report Viewer ---
-    const loginForm = document.getElementById('loginForm');
-    const pendingReportsContainer = document.getElementById('pendingReportsContainer');
-    const confirmedReportsContainer = document.getElementById('confirmedReportsContainer');
-    const logoutBtn = document.getElementById('logoutBtn');
+        // Fungsi untuk menampilkan form login dan menyembunyikan form daftar
+        function showLoginForm() {
+            loginForm.classList.add('active');
+            registerForm.classList.remove('active');
+            authMessageLogin.textContent = '';
+            authMessageRegister.textContent = '';
+        }
 
-    const ADMIN_USERNAME = "admin";
-    const ADMIN_PASSWORD = "admin123";
+        // Fungsi untuk menampilkan form daftar dan menyembunyikan form login
+        function showRegisterForm() {
+            registerForm.classList.add('active');
+            loginForm.classList.remove('active');
+            authMessageLogin.textContent = '';
+            authMessageRegister.textContent = '';
+        }
 
-    function showAdminSection() {
-        sections.forEach(section => {
-            section.style.display = 'none';
-        });
-        document.getElementById('adminSection').style.display = 'block';
-        loadReports();
-    }
+        async function loginUser() {
+            const email = loginEmailInput.value;
+            const password = loginPasswordInput.value;
+            authMessageLogin.textContent = '';
 
-    function loadReports() {
-        pendingReportsContainer.innerHTML = '<p>Memuat laporan pending...</p>';
-        confirmedReportsContainer.innerHTML = '<p>Memuat laporan yang sudah disetujui...</p>';
-        const reportsRef = ref(db, 'laporan');
-        onValue(reportsRef, (snapshot) => {
-            const reports = snapshot.val() || {};
-            const pendingReports = [];
-            const confirmedReports = [];
-
-            for (const key in reports) {
-                if (reports[key].konfirmasi === 'pending') {
-                    pendingReports.push({ id: key, ...reports[key] });
-                } else {
-                    confirmedReports.push({ id: key, ...reports[key] });
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                authMessageLogin.textContent = 'Login berhasil!';
+                authMessageLogin.style.color = '#27ae60';
+                setTimeout(() => {
+                    loginOverlay.style.display = 'none';
+                    loggedInPanel.style.display = 'flex';
+                    loginBox.style.display = 'none';
+                    welcomeMessage.textContent = `Selamat datang kembali, ${userCredential.user.email}!`;
+                    window.location.href = '#logged-in-panel';
+                }, 1000);
+            } catch (error) {
+                let errorMessage = "Terjadi kesalahan. Silakan coba lagi.";
+                if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+                    errorMessage = 'Email atau password salah.';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = 'Format email tidak valid.';
                 }
+                authMessageLogin.textContent = errorMessage;
+                authMessageLogin.style.color = '#e74c3c';
             }
-            
-            pendingReports.sort((a, b) => b.waktu - a.waktu);
-            confirmedReports.sort((a, b) => b.waktu - a.waktu);
-
-            renderReports(pendingReports, pendingReportsContainer, 'pending');
-            renderReports(confirmedReports, confirmedReportsContainer, 'confirmed');
-        });
-    }
-
-    function renderReports(reports, container, type) {
-        if (reports.length === 0) {
-            container.innerHTML = `<p>Tidak ada laporan ${type === 'pending' ? 'yang menunggu persetujuan' : 'yang sudah disetujui'}.</p>`;
-            return;
         }
         
-        let reportHtml = '';
-        reports.forEach(report => {
-            const date = new Date(report.waktu).toLocaleString();
-            const photoHtml = report.foto ? `<img src="${report.foto}" alt="Foto Laporan" class="admin-report-photo">` : '';
-            const statusClass = `status-${report.status.toLowerCase().replace(/\s/g, '-')}`;
+        async function registerUser() {
+            const username = registerUsernameInput.value;
+            const email = registerEmailInput.value;
+            const password = registerPasswordInput.value;
+            const confirmPassword = registerConfirmPasswordInput.value;
+            authMessageRegister.textContent = '';
 
-            reportHtml += `
-                <div class="admin-report-item">
-                    <p><b>Waktu:</b> ${date}</p>
-                    <p><b>Lokasi:</b> ${report.jalan}, ${report.daerah}, ${report.kota}, ${report.provinsi}</p>
-                    <p><b>Status:</b> <span class="${statusClass}">${report.status.toUpperCase()}</span></p>
-                    <p><b>Deskripsi:</b> ${report.deskripsi || '-'}</p>
-                    ${photoHtml}
-                    <div class="action-buttons" style="margin-top:10px;">
-                        ${type === 'pending' ? `<button class="btn btn-success" onclick="approveReport('${report.id}')">Setuju</button>` : ''}
-                        <button class="btn btn-danger" onclick="deleteReport('${report.id}')">Hapus</button>
-                    </div>
-                </div>
-            `;
-        });
-        container.innerHTML = reportHtml;
-    }
+            if (password !== confirmPassword) {
+                authMessageRegister.textContent = 'Password tidak cocok.';
+                authMessageRegister.style.color = '#e74c3c';
+                return;
+            }
 
-    window.approveReport = async (reportId) => {
-        if (confirm('Yakin ingin menyetujui laporan ini?')) {
-            const updates = {};
-            updates['/laporan/' + reportId + '/konfirmasi'] = 'confirmed';
             try {
-                await update(ref(db), updates);
-                alert('Laporan berhasil disetujui!');
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+
+                // Simpan username di Firebase Realtime Database
+                set(ref(database, 'users/' + user.uid), {
+                    username: username,
+                    email: email
+                });
+
+                authMessageRegister.textContent = 'Pendaftaran berhasil! Silakan masuk.';
+                authMessageRegister.style.color = '#27ae60';
+                registerUsernameInput.value = '';
+                registerEmailInput.value = '';
+                registerPasswordInput.value = '';
+                registerConfirmPasswordInput.value = '';
+
+                setTimeout(() => {
+                    showLoginForm();
+                }, 1500);
+
             } catch (error) {
-                console.error("Kesalahan saat menyetujui laporan:", error);
-                alert('Gagal menyetujui laporan.');
+                let errorMessage = "Terjadi kesalahan. Silakan coba lagi.";
+                if (error.code === 'auth/email-already-in-use') {
+                    errorMessage = 'Email sudah terdaftar. Gunakan email lain.';
+                } else if (error.code === 'auth/weak-password') {
+                    errorMessage = 'Password terlalu lemah. Gunakan minimal 6 karakter.';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = 'Format email tidak valid.';
+                }
+                authMessageRegister.textContent = errorMessage;
+                authMessageRegister.style.color = '#e74c3c';
             }
         }
-    };
 
-    window.deleteReport = async (reportId) => {
-        if (confirm('Yakin ingin menghapus laporan ini?')) {
-            try {
-                await remove(ref(db, 'laporan/' + reportId));
-                alert('Laporan berhasil dihapus!');
-            } catch (error) {
-                console.error("Kesalahan saat menghapus laporan:", error);
-                alert('Gagal menghapus laporan.');
+        function logout() {
+            signOut(auth).then(() => {
+                loggedInPanel.style.display = 'none';
+                loginBox.style.display = 'block';
+                window.location.href = '#beranda';
+                window.location.reload();
+            }).catch((error) => {
+                console.error("Logout error:", error);
+            });
+        }
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                loginBox.style.display = 'none';
+                loggedInPanel.style.display = 'flex';
+                // Anda bisa mengambil username dari database di sini jika perlu
+                welcomeMessage.textContent = `Selamat datang kembali, ${user.email}!`;
+            } else {
+                loginBox.style.display = 'block';
+                loggedInPanel.style.display = 'none';
             }
-        }
-    };
-
-    loginForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
-        if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
-            showAdminSection();
-            document.getElementById('loginSection').style.display = 'none';
-        } else {
-            alert('Username atau password salah!');
-        }
-    });
-
-    logoutBtn.addEventListener('click', () => {
-        sections.forEach(section => {
-            section.style.display = 'none';
         });
-        document.getElementById(defaultSectionId).style.display = 'block';
-        navLinks.forEach(navLink => {
-            navLink.classList.remove('active');
-        });
-        document.querySelector(`[data-target="${defaultSectionId}"]`).classList.add('active');
-    });
 
-</script>
+        window.addEventListener('scroll', checkVisibility);
+        window.addEventListener('load', checkVisibility);
+    </script>
 </body>
 </html>
