@@ -91,6 +91,7 @@
             padding: 0 20px;
             position: relative;
             overflow: hidden;
+            flex-direction: column; /* Tambahkan ini agar konten vertikal */
         }
 
         .section-1 {
@@ -113,7 +114,7 @@
             text-align: center;
         }
         
-        /* Bagian Berita (Baru) */
+        /* Bagian Berita */
         .section-4 {
             background-color: #f0f4f7;
             flex-direction: column;
@@ -309,6 +310,30 @@
             margin-top: 10px;
             font-size: 14px;
         }
+
+        /* Gaya Kotak Login di Halaman Utama (BARU) */
+        .login-box {
+            background-color: rgba(255, 255, 255, 0.2);
+            padding: 15px 30px;
+            border-radius: 8px;
+            margin-top: 30px;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            transition: transform 0.3s ease, background-color 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .login-box:hover {
+            transform: scale(1.05);
+            background-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .login-box a {
+            font-weight: 600;
+            color: var(--text-color-dark);
+            text-decoration: none;
+            font-size: 1.2rem;
+        }
     </style>
 </head>
 <body>
@@ -325,8 +350,11 @@
     <div class="main-wrapper">
         <section class="section section-1" id="beranda">
             <div class="section-content">
-                <h1 id="hero-title"><a href="#" id="login-link">Login</a> Selamat Datang di Titik Terang</h1>
+                <h1>Selamat Datang di Titik Terang</h1>
                 <p>Informasi terkini akan selalu kami update setiap waktu, dikembangkan oleh Pembuat web ini.</p>
+                <div class="login-box" id="login-box-container">
+                    <a href="#" id="login-link">Login</a>
+                </div>
             </div>
         </section>
 
@@ -406,6 +434,7 @@
         const sections = document.querySelectorAll('.section');
         const header = document.getElementById('main-header');
         const loginLink = document.getElementById('login-link');
+        const loginBox = document.getElementById('login-box-container');
         const loginOverlay = document.getElementById('login-overlay');
         const adminPanel = document.getElementById('admin-panel');
         const heroTitle = document.getElementById('hero-title');
@@ -416,7 +445,7 @@
                 const windowHeight = window.innerHeight;
                 const sectionContent = section.querySelector('.section-content');
 
-                if (sectionContent) { // Pastikan elemen konten ada sebelum diakses
+                if (sectionContent) {
                     if (sectionTop < windowHeight * 0.75 && sectionTop > -section.offsetHeight * 0.25) {
                         sectionContent.classList.add('visible');
                         section.classList.add('show');
@@ -453,10 +482,8 @@
             // Username dan password hardcoded
             if (usernameInput === 'admin' && passwordInput === '12345') {
                 loginOverlay.style.display = 'none';
-                loginLink.style.display = 'none';
+                loginBox.style.display = 'none'; // Sembunyikan kotak login
                 adminPanel.style.display = 'flex';
-                // Tambahkan pesan "Login berhasil" atau ubah tampilan hero
-                heroTitle.innerHTML = 'Selamat Datang Kembali, Admin!';
             } else {
                 loginMessage.textContent = 'Username atau password salah.';
             }
@@ -465,8 +492,7 @@
         // Fungsi Logout
         function logout() {
             adminPanel.style.display = 'none';
-            loginLink.style.display = 'inline';
-            heroTitle.innerHTML = '<a href="#" id="login-link">Login</a> Selamat Datang di Titik Terang';
+            loginBox.style.display = 'block'; // Tampilkan kembali kotak login
             window.location.reload(); // Refresh halaman untuk reset tampilan
         }
 
