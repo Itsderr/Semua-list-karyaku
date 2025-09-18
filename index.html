@@ -120,7 +120,7 @@
             color: var(--text-color-dark);
             text-align: center;
         }
-
+        
         /* Gaya Khusus untuk Efek Animasi */
         .section-content {
             z-index: 2;
@@ -134,7 +134,7 @@
             transform: translateY(0);
         }
 
-        .project-showcase, .news-content {
+        .project-showcase, .news-content, .admin-panel {
             max-width: 800px;
             width: 100%;
             background: #fff;
@@ -254,6 +254,61 @@
         .contact-content a:hover {
             text-decoration: underline;
         }
+        
+        /* Gaya Login Form (BARU) */
+        #login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        
+        .login-form-container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+        }
+        
+        .login-form-container input {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .login-form-container button {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--accent-color);
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        
+        .login-form-container button:hover {
+            background-color: #2980b9;
+        }
+
+        .login-form-container #login-message {
+            color: #e74c3c;
+            margin-top: 10px;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
@@ -270,7 +325,7 @@
     <div class="main-wrapper">
         <section class="section section-1" id="beranda">
             <div class="section-content">
-                <h1>Selamat Datang di Titik Terang</h1>
+                <h1 id="hero-title"><a href="#" id="login-link">Login</a> Selamat Datang di Titik Terang</h1>
                 <p>Informasi terkini akan selalu kami update setiap waktu, dikembangkan oleh Pembuat web ini.</p>
             </div>
         </section>
@@ -323,11 +378,37 @@
                 </p>
             </div>
         </section>
+        
+        <section class="section admin-panel-section" id="admin-panel" style="display: none;">
+            <div class="curtain-line left"></div>
+            <div class="curtain-line right"></div>
+            <div class="section-content admin-panel">
+                <h2>Dashboard Admin</h2>
+                <p>Selamat datang, Pembuat Web! Anda berhasil masuk.</p>
+                <p>Di sini Anda bisa mengelola konten atau menambahkan fitur khusus lainnya.</p>
+                <button onclick="logout()">Logout</button>
+            </div>
+        </section>
+
+    </div>
+
+    <div id="login-overlay">
+        <div class="login-form-container">
+            <h3>Login</h3>
+            <input type="text" id="username" placeholder="Username">
+            <input type="password" id="password" placeholder="Password">
+            <p id="login-message"></p>
+            <button onclick="performLogin()">Masuk</button>
+        </div>
     </div>
     
     <script>
         const sections = document.querySelectorAll('.section');
         const header = document.getElementById('main-header');
+        const loginLink = document.getElementById('login-link');
+        const loginOverlay = document.getElementById('login-overlay');
+        const adminPanel = document.getElementById('admin-panel');
+        const heroTitle = document.getElementById('hero-title');
 
         function checkVisibility() {
             sections.forEach((section, index) => {
@@ -335,16 +416,18 @@
                 const windowHeight = window.innerHeight;
                 const sectionContent = section.querySelector('.section-content');
 
-                if (sectionTop < windowHeight * 0.75 && sectionTop > -section.offsetHeight * 0.25) {
-                    sectionContent.classList.add('visible');
-                    section.classList.add('show');
-                    section.classList.remove('hide');
-                } else {
-                    sectionContent.classList.remove('visible');
-                    const prevSection = sections[index - 1];
-                    if (prevSection && prevSection.getBoundingClientRect().top > 0) {
-                        section.classList.add('hide');
-                        section.classList.remove('show');
+                if (sectionContent) { // Pastikan elemen konten ada sebelum diakses
+                    if (sectionTop < windowHeight * 0.75 && sectionTop > -section.offsetHeight * 0.25) {
+                        sectionContent.classList.add('visible');
+                        section.classList.add('show');
+                        section.classList.remove('hide');
+                    } else {
+                        sectionContent.classList.remove('visible');
+                        const prevSection = sections[index - 1];
+                        if (prevSection && prevSection.getBoundingClientRect().top > 0) {
+                            section.classList.add('hide');
+                            section.classList.remove('show');
+                        }
                     }
                 }
             });
@@ -354,6 +437,37 @@
             } else {
                 header.classList.remove('scrolled');
             }
+        }
+
+        // Fungsi Login
+        loginLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            loginOverlay.style.display = 'flex';
+        });
+
+        function performLogin() {
+            const usernameInput = document.getElementById('username').value;
+            const passwordInput = document.getElementById('password').value;
+            const loginMessage = document.getElementById('login-message');
+
+            // Username dan password hardcoded
+            if (usernameInput === 'admin' && passwordInput === '12345') {
+                loginOverlay.style.display = 'none';
+                loginLink.style.display = 'none';
+                adminPanel.style.display = 'flex';
+                // Tambahkan pesan "Login berhasil" atau ubah tampilan hero
+                heroTitle.innerHTML = 'Selamat Datang Kembali, Admin!';
+            } else {
+                loginMessage.textContent = 'Username atau password salah.';
+            }
+        }
+
+        // Fungsi Logout
+        function logout() {
+            adminPanel.style.display = 'none';
+            loginLink.style.display = 'inline';
+            heroTitle.innerHTML = '<a href="#" id="login-link">Login</a> Selamat Datang di Titik Terang';
+            window.location.reload(); // Refresh halaman untuk reset tampilan
         }
 
         window.addEventListener('scroll', checkVisibility);
