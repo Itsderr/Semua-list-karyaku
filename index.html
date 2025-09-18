@@ -112,6 +112,14 @@
             color: var(--text-color-dark);
             text-align: center;
         }
+        
+        /* Bagian Berita (Baru) */
+        .section-4 {
+            background-color: #f0f4f7;
+            flex-direction: column;
+            color: var(--text-color-dark);
+            text-align: center;
+        }
 
         /* Gaya Khusus untuk Efek Animasi */
         .section-content {
@@ -126,7 +134,7 @@
             transform: translateY(0);
         }
 
-        .project-showcase {
+        .project-showcase, .news-content {
             max-width: 800px;
             width: 100%;
             background: #fff;
@@ -136,6 +144,28 @@
             text-align: left;
         }
         
+        .news-item {
+            border-bottom: 1px solid #eee;
+            padding: 20px 0;
+            text-align: left;
+        }
+
+        .news-item:last-child {
+            border-bottom: none;
+        }
+
+        .news-item h3 {
+            color: var(--accent-color);
+            margin-top: 0;
+            font-size: 1.5rem;
+        }
+
+        .news-item p {
+            font-size: 1rem;
+            color: #666;
+            line-height: 1.6;
+        }
+
         /* Efek Garis "Membuka dan Menutup" */
         .curtain-line {
             position: absolute;
@@ -232,6 +262,7 @@
         <div class="logo">Titik Terang</div>
         <nav>
             <a href="#proyek">Proyek</a>
+            <a href="#berita">Berita</a>
             <a href="#kontak">Kontak</a>
         </nav>
     </header>
@@ -256,8 +287,28 @@
                 <a href="https://itsderr.github.io/LAPORAN-LALU-LINTAS-REALTIME/#" class="link-button" target="_blank">Lihat Proyek</a>
             </div>
         </section>
+        
+        <section class="section section-3" id="berita">
+            <div class="curtain-line left"></div>
+            <div class="curtain-line right"></div>
+            <div class="section-content news-content">
+                <h2>Berita Terbaru</h2>
+                <div class="news-item">
+                    <h3>Pengembangan Fitur Baru: Laporan Cuaca Real-time</h3>
+                    <p>
+                        Kami sedang dalam tahap pengembangan fitur baru untuk LaluLintasKu. Fitur ini akan menyajikan laporan cuaca real-time yang terintegrasi dengan data lalu lintas untuk membantu pengguna merencanakan perjalanan dengan lebih baik.
+                    </p>
+                </div>
+                <div class="news-item">
+                    <h3>Pembaruan Sistem LaluLintasKu</h3>
+                    <p>
+                        Pada tanggal 20 September 2025, kami akan melakukan pembaruan sistem untuk meningkatkan stabilitas dan kecepatan aplikasi. Selama proses ini, mungkin akan terjadi gangguan layanan singkat.
+                    </p>
+                </div>
+                </div>
+        </section>
 
-        <section class="section section-3" id="kontak">
+        <section class="section section-4" id="kontak">
             <div class="curtain-line left"></div>
             <div class="curtain-line right"></div>
             <div class="section-content contact-content">
