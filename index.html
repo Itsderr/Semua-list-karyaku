@@ -24,8 +24,8 @@
             padding: 0;
             background-color: var(--bg-color-1);
             color: var(--text-color-light);
-            transition: background-color 0.8s ease-in-out;
             scroll-behavior: smooth;
+            overflow-x: hidden; /* Mencegah scroll horizontal */
         }
 
         /* Header */
@@ -73,8 +73,8 @@
             justify-content: center;
             align-items: center;
             padding: 0 20px;
-            transition: background-color 0.8s ease-in-out;
             position: relative;
+            overflow: hidden;
         }
 
         .section-1 {
@@ -83,29 +83,31 @@
             color: var(--text-color-dark);
         }
 
-        .section-1 h1 {
-            font-size: 4rem;
-            margin: 0;
-            opacity: 0;
-            transform: translateY(20px);
-            animation: fadeIn 1s forwards;
-            animation-delay: 0.5s;
-        }
-        
-        .section-1 p {
-            font-size: 1.25rem;
-            margin-top: 10px;
-            opacity: 0;
-            transform: translateY(20px);
-            animation: fadeIn 1s forwards;
-            animation-delay: 1s;
-        }
-
         .section-2 {
             background-color: var(--bg-color-3);
             text-align: center;
             flex-direction: column;
             padding-top: 80px;
+        }
+
+        .section-3 {
+            background-color: var(--bg-color-1);
+            flex-direction: column;
+            color: var(--text-color-dark);
+            text-align: center;
+        }
+
+        /* Gaya Khusus untuk Efek Animasi */
+        .section-content {
+            z-index: 2;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .section-content.visible {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         .project-showcase {
@@ -116,16 +118,47 @@
             border-radius: 10px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.08);
             text-align: left;
-            opacity: 0;
-            transform: translateY(50px);
-            transition: opacity 0.8s ease, transform 0.8s ease;
         }
         
-        .project-showcase.visible {
-            opacity: 1;
-            transform: translateY(0);
+        /* Efek Garis "Membuka dan Menutup" */
+        .curtain-line {
+            position: absolute;
+            height: 100%;
+            width: 50%;
+            background-color: var(--bg-color-1); /* Sesuaikan dengan warna latar belakang halaman */
+            z-index: 5; /* Pastikan di atas konten */
+            transition: transform 1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
 
+        .curtain-line.left {
+            top: 0;
+            left: 0;
+            transform: translateX(0);
+        }
+        
+        .curtain-line.right {
+            top: 0;
+            right: 0;
+            transform: translateX(0);
+        }
+
+        /* Saat di-scroll ke bawah */
+        .section.show .curtain-line.left {
+            transform: translateX(-100%);
+        }
+        .section.show .curtain-line.right {
+            transform: translateX(100%);
+        }
+        
+        /* Saat digulir ke atas (menuju halaman sebelumnya) */
+        .section.hide .curtain-line.left {
+            transform: translateX(0);
+        }
+        .section.hide .curtain-line.right {
+            transform: translateX(0);
+        }
+
+        /* Konten dalam bagian proyek */
         .project-showcase h2 {
             font-size: 2.5rem;
             color: var(--accent-color);
@@ -154,24 +187,7 @@
             background-color: #2980b9;
         }
 
-        .section-3 {
-            background-color: var(--bg-color-1);
-            flex-direction: column;
-            color: var(--text-color-dark);
-            text-align: center;
-        }
-        
-        .section-3 .contact-content {
-            opacity: 0;
-            transform: translateY(50px);
-            transition: opacity 0.8s ease, transform 0.8s ease;
-        }
-
-        .section-3 .contact-content.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
+        /* Konten dalam bagian kontak */
         .contact-content h2 {
             font-size: 2.5rem;
             margin-bottom: 20px;
@@ -192,14 +208,6 @@
         .contact-content a:hover {
             text-decoration: underline;
         }
-        
-        /* Animasi Kunci */
-        @keyframes fadeIn {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
     </style>
 </head>
 <body>
@@ -214,14 +222,16 @@
 
     <div class="main-wrapper">
         <section class="section section-1" id="beranda">
-            <div>
+            <div class="section-content">
                 <h1>Selamat Datang di Portofolio Saya</h1>
                 <p>Jelajahi karya terbaik yang telah saya kembangkan.</p>
             </div>
         </section>
 
         <section class="section section-2" id="proyek">
-            <div class="project-showcase">
+            <div class="curtain-line left"></div>
+            <div class="curtain-line right"></div>
+            <div class="section-content project-showcase">
                 <h2>LaluLintasKu — Statistik & Laporan</h2>
                 <p>
                     Ini adalah proyek utama saya, sebuah sistem real-time untuk memantau dan melaporkan kondisi lalu lintas. Aplikasi ini tidak hanya menyajikan data statistik yang akurat, tetapi juga memungkinkan pengguna untuk memberikan laporan langsung mengenai kejadian di jalan.
@@ -232,7 +242,9 @@
         </section>
 
         <section class="section section-3" id="kontak">
-            <div class="contact-content">
+            <div class="curtain-line left"></div>
+            <div class="curtain-line right"></div>
+            <div class="section-content contact-content">
                 <h2>Hubungi Saya</h2>
                 <p>
                     Tertarik untuk berdiskusi lebih lanjut atau memiliki proyek yang ingin dikerjakan bersama? Jangan ragu untuk menghubungi saya melalui informasi di bawah ini.
@@ -251,18 +263,22 @@
         const header = document.getElementById('main-header');
 
         function checkVisibility() {
-            sections.forEach(section => {
+            sections.forEach((section, index) => {
                 const sectionTop = section.getBoundingClientRect().top;
                 const windowHeight = window.innerHeight;
+                const sectionContent = section.querySelector('.section-content');
 
-                if (sectionTop < windowHeight * 0.75) {
-                    const showcase = section.querySelector('.project-showcase');
-                    const contactContent = section.querySelector('.contact-content');
-                    if (showcase) {
-                        showcase.classList.add('visible');
-                    }
-                    if (contactContent) {
-                        contactContent.classList.add('visible');
+                if (sectionTop < windowHeight * 0.75 && sectionTop > -section.offsetHeight * 0.25) {
+                    sectionContent.classList.add('visible');
+                    section.classList.add('show');
+                    section.classList.remove('hide');
+                } else {
+                    sectionContent.classList.remove('visible');
+                    // Tambahkan logika untuk efek "menutup" saat menggulir ke atas
+                    const prevSection = sections[index - 1];
+                    if (prevSection && prevSection.getBoundingClientRect().top > 0) {
+                        section.classList.add('hide');
+                        section.classList.remove('show');
                     }
                 }
             });
