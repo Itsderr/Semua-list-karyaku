@@ -7,6 +7,11 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-analytics.js"></script>
+
     <style>
         /* Gaya Dasar */
         :root {
@@ -91,7 +96,7 @@
             padding: 0 20px;
             position: relative;
             overflow: hidden;
-            flex-direction: column; /* Tambahkan ini agar konten vertikal */
+            flex-direction: column;
         }
 
         .section-1 {
@@ -256,7 +261,7 @@
             text-decoration: underline;
         }
         
-        /* Gaya Login Form (BARU) */
+        /* Gaya Login Form */
         #login-overlay {
             position: fixed;
             top: 0;
@@ -300,18 +305,23 @@
             cursor: pointer;
             transition: background-color 0.3s ease;
         }
+
+        .login-form-container .toggle-button {
+            background-color: #ccc;
+            margin-top: 10px;
+        }
         
         .login-form-container button:hover {
             background-color: #2980b9;
         }
 
-        .login-form-container #login-message {
+        .login-form-container #auth-message {
             color: #e74c3c;
             margin-top: 10px;
             font-size: 14px;
         }
 
-        /* Gaya Kotak Login di Halaman Utama (BARU) */
+        /* Gaya Kotak Login di Halaman Utama */
         .login-box {
             background-color: rgba(255, 255, 255, 0.2);
             padding: 15px 30px;
@@ -350,7 +360,7 @@
     <div class="main-wrapper">
         <section class="section section-1" id="beranda">
             <div class="section-content">
-                <h1>Selamat Datang di Titik Terang</h1>
+                <h1 id="hero-title">Selamat Datang di Titik Terang</h1>
                 <p>Informasi terkini akan selalu kami update setiap waktu, dikembangkan oleh Pembuat web ini.</p>
                 <div class="login-box" id="login-box-container">
                     <a href="#" id="login-link">Login</a>
@@ -407,13 +417,13 @@
             </div>
         </section>
         
-        <section class="section admin-panel-section" id="admin-panel" style="display: none;">
+        <section class="section logged-in-section" id="logged-in-panel" style="display: none;">
             <div class="curtain-line left"></div>
             <div class="curtain-line right"></div>
             <div class="section-content admin-panel">
-                <h2>Dashboard Admin</h2>
-                <p>Selamat datang, Pembuat Web! Anda berhasil masuk.</p>
-                <p>Di sini Anda bisa mengelola konten atau menambahkan fitur khusus lainnya.</p>
+                <h2 id="welcome-message">Dashboard Pengguna</h2>
+                <p>Selamat datang! Anda berhasil masuk.</p>
+                <p>Ini adalah area yang hanya bisa dilihat oleh pengguna terdaftar.</p>
                 <button onclick="logout()">Logout</button>
             </div>
         </section>
@@ -422,22 +432,47 @@
 
     <div id="login-overlay">
         <div class="login-form-container">
-            <h3>Login</h3>
-            <input type="text" id="username" placeholder="Username">
-            <input type="password" id="password" placeholder="Password">
-            <p id="login-message"></p>
-            <button onclick="performLogin()">Masuk</button>
+            <h3>Login / Daftar</h3>
+            <input type="email" id="email" placeholder="Email" required>
+            <input type="password" id="password" placeholder="Password" required>
+            <p id="auth-message"></p>
+            <button onclick="loginUser()">Masuk</button>
+            <button class="toggle-button" onclick="registerUser()">Daftar</button>
         </div>
     </div>
     
-    <script>
+    <script type="module">
+        // Import fungsi dari Firebase SDK
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
+        import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-analytics.js";
+        
+        // Konfigurasi Firebase Anda
+        const firebaseConfig = {
+            apiKey: "AIzaSyD-acVs8C9uW2FGJgVEgFuJnD7eOXzTY-s",
+            authDomain: "titik-terang.firebaseapp.com",
+            projectId: "titik-terang",
+            storageBucket: "titik-terang.firebasestorage.app",
+            messagingSenderId: "738159683181",
+            appId: "1:738159683181:web:cdd1298f198abab1c2c164",
+            measurementId: "G-V18Y32S4T3"
+        };
+        
+        // Inisialisasi Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const auth = getAuth(app);
+
         const sections = document.querySelectorAll('.section');
         const header = document.getElementById('main-header');
         const loginLink = document.getElementById('login-link');
         const loginBox = document.getElementById('login-box-container');
         const loginOverlay = document.getElementById('login-overlay');
-        const adminPanel = document.getElementById('admin-panel');
-        const heroTitle = document.getElementById('hero-title');
+        const loggedInPanel = document.getElementById('logged-in-panel');
+        const authMessage = document.getElementById('auth-message');
+        const welcomeMessage = document.getElementById('welcome-message');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
 
         function checkVisibility() {
             sections.forEach((section, index) => {
@@ -468,33 +503,86 @@
             }
         }
 
-        // Fungsi Login
         loginLink.addEventListener('click', (e) => {
             e.preventDefault();
             loginOverlay.style.display = 'flex';
         });
 
-        function performLogin() {
-            const usernameInput = document.getElementById('username').value;
-            const passwordInput = document.getElementById('password').value;
-            const loginMessage = document.getElementById('login-message');
+        async function loginUser() {
+            const email = emailInput.value;
+            const password = passwordInput.value;
 
-            // Username dan password hardcoded
-            if (usernameInput === 'admin' && passwordInput === '12345') {
-                loginOverlay.style.display = 'none';
-                loginBox.style.display = 'none'; // Sembunyikan kotak login
-                adminPanel.style.display = 'flex';
-            } else {
-                loginMessage.textContent = 'Username atau password salah.';
+            try {
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                authMessage.textContent = 'Login berhasil!';
+                authMessage.style.color = '#27ae60';
+                setTimeout(() => {
+                    loginOverlay.style.display = 'none';
+                    // Tampilkan panel khusus pengguna terdaftar
+                    loggedInPanel.style.display = 'flex';
+                    loginBox.style.display = 'none';
+                    welcomeMessage.textContent = `Selamat datang kembali, ${userCredential.user.email}!`;
+                    window.location.href = '#logged-in-panel';
+                }, 1000);
+            } catch (error) {
+                let errorMessage = "Terjadi kesalahan. Silakan coba lagi.";
+                if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+                    errorMessage = 'Email atau password salah.';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = 'Format email tidak valid.';
+                }
+                authMessage.textContent = errorMessage;
+                authMessage.style.color = '#e74c3c';
+            }
+        }
+        
+        async function registerUser() {
+            const email = emailInput.value;
+            const password = passwordInput.value;
+            
+            try {
+                await createUserWithEmailAndPassword(auth, email, password);
+                authMessage.textContent = 'Pendaftaran berhasil! Silakan login.';
+                authMessage.style.color = '#27ae60';
+                emailInput.value = '';
+                passwordInput.value = '';
+            } catch (error) {
+                let errorMessage = "Terjadi kesalahan. Silakan coba lagi.";
+                if (error.code === 'auth/email-already-in-use') {
+                    errorMessage = 'Email sudah terdaftar. Gunakan email lain.';
+                } else if (error.code === 'auth/weak-password') {
+                    errorMessage = 'Password terlalu lemah. Gunakan minimal 6 karakter.';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = 'Format email tidak valid.';
+                }
+                authMessage.textContent = errorMessage;
+                authMessage.style.color = '#e74c3c';
             }
         }
 
-        // Fungsi Logout
         function logout() {
-            adminPanel.style.display = 'none';
-            loginBox.style.display = 'block'; // Tampilkan kembali kotak login
-            window.location.reload(); // Refresh halaman untuk reset tampilan
+            signOut(auth).then(() => {
+                loggedInPanel.style.display = 'none';
+                loginBox.style.display = 'block';
+                window.location.href = '#beranda';
+                window.location.reload();
+            }).catch((error) => {
+                console.error("Logout error:", error);
+            });
         }
+
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // Pengguna sudah login
+                loginBox.style.display = 'none';
+                loggedInPanel.style.display = 'flex';
+                welcomeMessage.textContent = `Selamat datang kembali, ${user.email}!`;
+            } else {
+                // Pengguna belum login
+                loginBox.style.display = 'block';
+                loggedInPanel.style.display = 'none';
+            }
+        });
 
         window.addEventListener('scroll', checkVisibility);
         window.addEventListener('load', checkVisibility);
